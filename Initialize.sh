@@ -20,15 +20,16 @@ fallback_command () {
 #General logic for starting a particular service
 start_service () {
 	file_exists
-	$1 >/dev/null 2>&1 & echo $2" "$! > process.tid
+	$1 >/dev/null 2>&1 & echo $2" "$! >> process.tid
 	echo "Starting "$2" at $!"
 }
 
 #General logic for stoping of already running service
 stop_service () {
-	cat process.tid | grep $1 | awk '{print $2}' | xargs kill || fallback_command
+	PID=`cat process.tid | grep $1 | awk '{print $2}'`
 	echo "Stopping "$1"..."
-	rm process.tid
+	kill -9 $PID || fallback_command
+	sed -i "/$1/d" process.tid
 }
 
 stop_all_services () {
